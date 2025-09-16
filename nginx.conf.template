@@ -1,0 +1,48 @@
+# This is loaded by the official nginx image from /etc/nginx/conf.d/*
+# The docker entrypoint below will envsubst this template to /etc/nginx/conf.d/reverse.conf
+
+server {
+    listen 80;
+    listen [::]:80;
+
+    # Add DNS resolver - dynamically configured by entrypoint script
+    resolver ${DNS_RESOLVER} valid=300s;
+    resolver_timeout 5s;
+
+    # Upstream is supplied via env var ORIGIN (e.g., http://app:3000)
+    set $upstream "${ORIGIN}";
+
+    # Basic hardening / sane defaults
+    client_max_body_size 50m;
+
+    # Proxy headers
+    location / {
+        proxy_http_version 1.1;
+
+        # For HTTPS upstreams, we need to send the upstream host for SSL cert validation
+        # Extract host from upstream URL for proper SSL handshake
+        proxy_ssl_server_name on;
+        proxy_ssl_name $proxy_host;
+
+        proxy_set_header Host $proxy_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $host;
+
+        # WebSocket support
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+
+        proxy_pass $upstream;
+
+        # Conditionally included by the entrypoint (may be empty)
+        include /etc/nginx/snippets/basic_auth.conf;
+    }
+}
+
+# Map for Connection header that works for both WS and regular HTTP
+map $http_upgrade $connection_upgrade {
+    default upgrade;
+    '' close;
+}
