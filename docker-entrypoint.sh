@@ -3,15 +3,13 @@ set -euo pipefail
 
 # Fail fast if ORIGIN is missing
 if [[ -z "${ORIGIN:-}" ]]; then
-  echo "[entrypoint] ERROR: ORIGIN env var is required (e.g. http://app:3000 or https://example.com)"
+  echo "[entrypoint] ERROR: ORIGIN env var is required (e.g. app:3000 or example.com)"
   exit 1
 fi
 
-# Validate ORIGIN format
-if [[ "$ORIGIN" != http://* && "$ORIGIN" != https://* ]]; then
-  echo "[entrypoint] ERROR: ORIGIN must start with http:// or https://"
-  exit 1
-fi
+ORIGIN_WITH_HTTP="http://${ORIGIN}"
+
+
 
 # Require BASIC_AUTH for easier debugging (set ALLOW_NO_AUTH=true to disable this check)
 if [[ -z "${BASIC_AUTH:-}" && "${ALLOW_NO_AUTH:-}" != "true" ]]; then
@@ -103,7 +101,7 @@ fi
 
 echo "[entrypoint] Generating nginx configuration with DNS resolver: $DNS_RESOLVER"
 export DNS_RESOLVER
-envsubst '\$ORIGIN \$DNS_RESOLVER' < /etc/nginx/templates/reverse.conf.template > /etc/nginx/conf.d/reverse.conf
+envsubst '\$ORIGIN_WITH_HTTP \$DNS_RESOLVER' < /etc/nginx/templates/reverse.conf.template > /etc/nginx/conf.d/reverse.conf
 
 # Verify the config was generated
 if [[ ! -f /etc/nginx/conf.d/reverse.conf || ! -s /etc/nginx/conf.d/reverse.conf ]]; then
