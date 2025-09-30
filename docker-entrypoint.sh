@@ -101,7 +101,7 @@ fi
 
 echo "[entrypoint] Generating nginx configuration with DNS resolver: $DNS_RESOLVER"
 export DNS_RESOLVER
-envsubst '\$ORIGIN_WITH_HTTP \$DNS_RESOLVER' < /etc/nginx/templates/reverse.conf.template > /etc/nginx/conf.d/reverse.conf
+envsubst '\$ORIGIN \$DNS_RESOLVER' < /etc/nginx/templates/reverse.conf.template > /etc/nginx/conf.d/reverse.conf
 
 # Verify the config was generated
 if [[ ! -f /etc/nginx/conf.d/reverse.conf || ! -s /etc/nginx/conf.d/reverse.conf ]]; then
