@@ -2,8 +2,8 @@
 # The docker entrypoint below will envsubst this template to /etc/nginx/conf.d/reverse.conf
 
 server {
-    listen 80;
-    listen [::]:80;
+    listen 80 http2;
+    listen [::]:80 http2;
 
     # Add DNS resolver - dynamically configured by entrypoint script
     resolver ${DNS_RESOLVER} valid=300s;
@@ -17,7 +17,7 @@ server {
 
     # Proxy headers
     location / {
-        proxy_http_version 1.1;
+        proxy_http_version 2.0;
 
         # For HTTPS upstreams, we need to send the upstream host for SSL cert validation
         # Extract host from upstream URL for proper SSL handshake
