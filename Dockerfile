@@ -1,25 +1,21 @@
 FROM nginx:1.27-alpine
+# CACHE_BUST: Force full rebuild - timestamp 2026-02-09T20:42:00Z
+# Remove default entrypoint scripts that interfere with our custom configuration
+RUN rm -rf /docker-entrypoint.d/
+RUN rm -rf /etc/nginx/templates/
 
-# We need: envsubst (from gettext) and htpasswd (apache2-utils) to hash credentials
-RUN apk add --no-cache bash gettext apache2-utils
+# Copy custom entrypoint script
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
 
-# Where we'll drop an optional auth snippet
-RUN mkdir -p /etc/nginx/snippets
+# Copy nginx config template
+COPY nginx.conf.template /etc/nginx/nginx.conf.template
 
-# Template -> real conf at runtime
-COPY nginx.conf.template /etc/nginx/templates/reverse.conf.template
+# Install dependencies for template substitution
+RUN apk add --no-cache gettext apache2-utils && \
+    mkdir -p /etc/nginx/conf.d
 
-# Entrypoint script runs after the stock nginx entrypoint setup
-COPY docker-entrypoint.sh /docker-entrypoint.d/99-reverse-proxy.sh
-RUN chmod +x /docker-entrypoint.d/99-reverse-proxy.sh
+    EXPOSE 80
 
-# Nginx listens on 80
-EXPOSE 80
-
-# Default envs (can be overridden at run time)
-ENV ORIGIN=""
-ENV BASIC_AUTH=""
-ENV BASIC_AUTH_REALM="Restricted"
-
-# Let the stock entrypoint handle templating + daemon
-CMD ["nginx", "-g", "daemon off;"]
+    # Use custom entrypoint to substitute variables and start nginx
+    ENTRYPOINT ["/docker-entrypoint.sh"]
