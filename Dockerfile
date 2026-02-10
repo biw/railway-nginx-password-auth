@@ -1,5 +1,8 @@
 FROM nginx:1.27-alpine
 
+# Remove default entrypoint scripts that interfere with our custom configuration
+RUN rm -rf /docker-entrypoint.d/
+
 # Copy custom entrypoint script
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
