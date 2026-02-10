@@ -1,6 +1,5 @@
 FROM nginx:1.27-alpine
-# CACHE_BUST: fix-502-errors-v10-force-clean-rebuild# CACHE_BUST: docker-entrypoint.d cleanup v6
-
+# CACHE_BUST: Force full rebuild - timestamp 2026-02-09T20:42:00Z
 # Remove default entrypoint scripts that interfere with our custom configuration
 RUN rm -rf /docker-entrypoint.d/
 
