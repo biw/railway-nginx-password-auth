@@ -1,6 +1,6 @@
 # Railway Nginx Password Auth
 
-[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/iC1z8D?referralCode=Dk06R-&utm_medium=integration&utm_source=template&utm_campaign=generic)
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/nginx-password-auth)
 
 A lightweight nginx-based reverse proxy with HTTP Basic Authentication, designed for deployment on Railway and other container platforms.
 
